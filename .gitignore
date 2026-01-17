@@ -1,0 +1,39 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Elixir
+/_build/
+/deps/
+/.elixir_ls/
+*.beam
+*.ez
+
+# Mix
+/mix.lock
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+/logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+docs/
