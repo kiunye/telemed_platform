@@ -73,6 +73,70 @@ defmodule TelemedAdminWeb.Layouts do
   end
 
   @doc """
+  Admin layout with navigation and user info.
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+  attr :current_user, :map, default: nil, doc: "the current authenticated user"
+  slot :inner_block, required: true
+
+  def admin(assigns) do
+    ~H"""
+    <div class="min-h-screen bg-neutral-50">
+      <nav class="bg-white shadow-sm border-b border-neutral-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <div class="flex">
+              <div class="flex-shrink-0 flex items-center">
+                <h1 class="text-xl font-semibold text-primary-700">Telemed Admin</h1>
+              </div>
+              <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <a
+                  href={~p"/dashboard"}
+                  class="border-primary-500 text-neutral-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Dashboard
+                </a>
+                <a
+                  href={~p"/users"}
+                  class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Users
+                </a>
+                <a
+                  href={~p"/audit"}
+                  class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Audit Logs
+                </a>
+              </div>
+            </div>
+            <div class="flex items-center">
+              <span class="text-sm text-neutral-700 mr-4">
+                <%= if @current_user do %>
+                  <%= @current_user.email %>
+                <% end %>
+              </span>
+              <a
+                href={~p"/login"}
+                class="text-sm text-neutral-500 hover:text-neutral-700"
+              >
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {render_slot(@inner_block)}
+      </main>
+    </div>
+
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
   Shows the flash group with standard titles and content.
 
   ## Examples

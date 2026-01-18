@@ -36,6 +36,7 @@ defmodule TelemedCore.MixProject do
       {:jason, "~> 1.4"},
       {:uuid, "~> 2.0"},
       {:bcrypt_elixir, "~> 3.0"},
+      {:joken, "~> 2.6"},
 
       # Encryption (for PHI)
       {:cloak_ecto, "~> 1.2"},

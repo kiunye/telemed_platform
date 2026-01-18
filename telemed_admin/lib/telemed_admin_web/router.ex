@@ -10,6 +10,10 @@ defmodule TelemedAdminWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :require_authenticated do
+    plug TelemedAdminWeb.Plugs.RequireAuthenticated
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -17,7 +21,15 @@ defmodule TelemedAdminWeb.Router do
   scope "/", TelemedAdminWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/login", Auth.LoginLive, :index
+  end
+
+  scope "/", TelemedAdminWeb do
+    pipe_through [:browser, :require_authenticated]
+
+    live "/dashboard", DashboardLive, :index, layout: {TelemedAdminWeb.Layouts, :admin}
+    live "/users", UsersLive, :index, layout: {TelemedAdminWeb.Layouts, :admin}
+    live "/audit", AuditLive, :index, layout: {TelemedAdminWeb.Layouts, :admin}
   end
 
   # Other scopes may use custom stacks.
