@@ -6,7 +6,8 @@ defmodule TelemedCore.Audit.EHRAccessLog do
   """
   use Ash.Resource,
     domain: TelemedCore.Audit,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "ehr_access_logs"
@@ -14,7 +15,7 @@ defmodule TelemedCore.Audit.EHRAccessLog do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "ehr"
+    uuid_v7_primary_key :id
 
     attribute :access_type, :atom do
       allow_nil? false
@@ -63,12 +64,12 @@ defmodule TelemedCore.Audit.EHRAccessLog do
 
     # Admins can read all access logs
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
 
     # Doctors can read access logs for their patients
     policy always() do
-      authorize_if expr(actor.role == :doctor)
+      authorize_if expr(actor.role == "doctor")
     end
   end
 end

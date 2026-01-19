@@ -5,6 +5,7 @@ defmodule TelemedAdminWeb.Auth.LoginLive do
   use TelemedAdminWeb, :live_view
 
   alias TelemedCore.Accounts.Impl.AuthService
+  import Phoenix.LiveView
 
   @impl true
   def mount(_params, _session, socket) do
@@ -20,8 +21,8 @@ defmodule TelemedAdminWeb.Auth.LoginLive do
           {:noreply,
            socket
            |> put_flash(:info, "Logged in successfully")
-           |> put_session(:user_id, user.id)
-           |> redirect(to: ~p"/dashboard")}
+           |> Phoenix.LiveView.put_session(:user_id, user.id)
+           |> redirect(to: "/dashboard")}
         else
           {:noreply,
            assign(socket, error: "Access denied. Admin or doctor role required.")}

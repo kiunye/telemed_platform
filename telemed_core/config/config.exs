@@ -1,5 +1,8 @@
 import Config
 
+# Configure Ecto repositories
+config :telemed_core, ecto_repos: [TelemedCore.Repo]
+
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
 # file won't be loaded and the deps function in the mix.exs file
@@ -16,7 +19,7 @@ config :telemed_core, TelemedCore.Repo,
 
 # Ash configuration
 config :telemed_core,
-  ash_domains: [TelemedCore.Accounts, TelemedCore.Audit]
+  ash_domains: [TelemedCore.Accounts, TelemedCore.Audit, TelemedCore.Appointments]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

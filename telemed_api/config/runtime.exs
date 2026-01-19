@@ -20,6 +20,16 @@ if System.get_env("PHX_SERVER") do
   config :telemed_api, TelemedApiWeb.Endpoint, server: true
 end
 
+# Configure database connection for TelemedCore.Repo
+# This applies to all environments (dev, test, prod)
+config :telemed_core, TelemedCore.Repo,
+  database: System.get_env("POSTGRES_DB") || "telemed_dev",
+  username: System.get_env("POSTGRES_USER") || "telemed",
+  password: System.get_env("POSTGRES_PASSWORD") || "telemed_dev_password",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
+  port: String.to_integer(System.get_env("POSTGRES_PORT") || "5432"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

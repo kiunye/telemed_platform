@@ -15,7 +15,7 @@ defmodule TelemedAdminWeb.Plugs.RequireAuthenticated do
       nil ->
         conn
         |> put_flash(:error, "You must be logged in to access this page")
-        |> redirect(to: ~p"/login")
+        |> redirect(to: "/login")
         |> halt()
 
       user_id ->
@@ -27,14 +27,14 @@ defmodule TelemedAdminWeb.Plugs.RequireAuthenticated do
             else
               conn
               |> put_flash(:error, "Access denied")
-              |> redirect(to: ~p"/login")
+              |> redirect(to: "/login")
               |> halt()
             end
 
           {:error, _} ->
             conn
             |> put_flash(:error, "User not found")
-            |> redirect(to: ~p"/login")
+            |> redirect(to: "/login")
             |> halt()
         end
     end

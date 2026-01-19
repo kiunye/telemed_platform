@@ -4,7 +4,8 @@ defmodule TelemedCore.Accounts.PatientProfile do
   """
   use Ash.Resource,
     domain: TelemedCore.Accounts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "patient_profiles"
@@ -12,7 +13,7 @@ defmodule TelemedCore.Accounts.PatientProfile do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "pat"
+    uuid_v7_primary_key :id
 
     attribute :date_of_birth, :date
     attribute :gender, :string
@@ -27,7 +28,6 @@ defmodule TelemedCore.Accounts.PatientProfile do
     belongs_to :user, TelemedCore.Accounts.User do
       attribute_writable? true
       allow_nil? false
-      unique? true
     end
   end
 
@@ -52,12 +52,12 @@ defmodule TelemedCore.Accounts.PatientProfile do
     # Doctors can read patient profiles for appointments they have
     # (Will be expanded when appointments are implemented)
     policy always() do
-      authorize_if expr(actor.role == :doctor)
+      authorize_if expr(actor.role == "doctor")
     end
 
     # Admins can read all profiles
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
   end
 end

@@ -16,6 +16,16 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
+# Configure database connection for TelemedCore.Repo
+# This applies to all environments (dev, test, prod)
+config :telemed_core, TelemedCore.Repo,
+  database: System.get_env("POSTGRES_DB") || "telemed_dev",
+  username: System.get_env("POSTGRES_USER") || "telemed",
+  password: System.get_env("POSTGRES_PASSWORD") || "telemed_dev_password",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
+  port: String.to_integer(System.get_env("POSTGRES_PORT") || "5432"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+
 if System.get_env("PHX_SERVER") do
   config :telemed_admin, TelemedAdminWeb.Endpoint, server: true
 end

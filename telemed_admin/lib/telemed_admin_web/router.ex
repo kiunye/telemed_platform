@@ -27,9 +27,9 @@ defmodule TelemedAdminWeb.Router do
   scope "/", TelemedAdminWeb do
     pipe_through [:browser, :require_authenticated]
 
-    live "/dashboard", DashboardLive, :index, layout: {TelemedAdminWeb.Layouts, :admin}
-    live "/users", UsersLive, :index, layout: {TelemedAdminWeb.Layouts, :admin}
-    live "/audit", AuditLive, :index, layout: {TelemedAdminWeb.Layouts, :admin}
+    live "/dashboard", DashboardLive, :index
+    live "/users", UsersLive, :index
+    live "/audit", AuditLive, :index
   end
 
   # Other scopes may use custom stacks.

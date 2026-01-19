@@ -26,7 +26,10 @@ defmodule TelemedCore.MixProject do
       {:ash, "~> 3.13.1"},
       {:ash_postgres, "~> 2.0"},
       {:ash_json_api, "~> 1.0", optional: true},
-      {:ash_phoenix, "~> 1.0", optional: true},
+      {:ash_phoenix, "~> 2.3"},
+
+      # SAT solver for Ash policy verification
+      {:simple_sat, "~> 0.1.4"},
 
       # Database
       {:ecto_sql, "~> 3.12"},
@@ -34,7 +37,7 @@ defmodule TelemedCore.MixProject do
 
       # Utilities
       {:jason, "~> 1.4"},
-      {:uuid, "~> 2.0"},
+      {:uuid, "~> 1.1"},
       {:bcrypt_elixir, "~> 3.0"},
       {:joken, "~> 2.6"},
 

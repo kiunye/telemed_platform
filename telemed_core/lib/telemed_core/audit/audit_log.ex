@@ -6,7 +6,8 @@ defmodule TelemedCore.Audit.AuditLog do
   """
   use Ash.Resource,
     domain: TelemedCore.Audit,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "audit_logs"
@@ -14,7 +15,7 @@ defmodule TelemedCore.Audit.AuditLog do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "aud"
+    uuid_v7_primary_key :id
 
     attribute :action, :string do
       allow_nil? false
@@ -63,7 +64,7 @@ defmodule TelemedCore.Audit.AuditLog do
   policies do
     # Only admins can read audit logs
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
   end
 end

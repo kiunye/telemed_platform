@@ -5,20 +5,25 @@ defmodule TelemedApiWeb.AuthController do
   use TelemedApiWeb, :controller
 
   alias TelemedCore.Accounts.Impl.AuthService
-  alias TelemedCore.Accounts.User
 
   @doc """
   Register a new user.
   POST /api/v1/auth/register
   """
   def register(conn, params) do
+    # Validate role string, defaulting to "patient" if invalid
+    role = case params["role"] do
+      role when role in ["patient", "doctor", "admin"] -> role
+      _ -> "patient"
+    end
+
     attrs = %{
       email: params["email"],
       password: params["password"],
       first_name: params["first_name"],
       last_name: params["last_name"],
       phone: params["phone"],
-      role: String.to_existing_atom(params["role"] || "patient")
+      role: role
     }
 
     case AuthService.register(attrs) do
@@ -35,6 +40,14 @@ defmodule TelemedApiWeb.AuthController do
           }
         })
 
+      {:error, %Ash.Error.Invalid{} = error} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{
+          error: "Validation failed",
+          details: format_ash_errors(error)
+        })
+
       {:error, %Ash.Changeset{} = changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -43,10 +56,15 @@ defmodule TelemedApiWeb.AuthController do
           details: format_changeset_errors(changeset)
         })
 
-      {:error, reason} ->
+      {:error, reason} when is_atom(reason) ->
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{error: to_string(reason)})
+
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "An error occurred", details: inspect(reason)})
     end
   end
 
@@ -87,7 +105,10 @@ defmodule TelemedApiWeb.AuthController do
       {:error, :user_not_found} ->
         conn
         |> put_status(:unauthorized)
-        |> json(%{error: "Invalid email or password"})
+        |> json(%{
+          error: "Invalid email or password",
+          message: "User not found. Please register at POST /api/v1/auth/register"
+        })
 
       {:error, :invalid_password} ->
         conn
@@ -193,12 +214,39 @@ defmodule TelemedApiWeb.AuthController do
 
   # Helper functions
 
+  defp format_ash_errors(%Ash.Error.Invalid{errors: errors}) do
+    errors
+    |> Enum.map(fn error ->
+      # Extract field from error struct - Ash errors have a :field key
+      field = Map.get(error, :field, :base)
+
+      # Get the error message and clean up breadcrumbs
+      message = Exception.message(error)
+      |> clean_error_message()
+
+      %{
+        field: to_string(field),
+        message: message
+      }
+    end)
+  end
+
+  defp clean_error_message(message) do
+    # Remove breadcrumbs prefix if present
+    message
+    |> String.split("\n")
+    |> Enum.reject(&String.starts_with?(&1, "Bread Crumbs:"))
+    |> Enum.reject(&String.starts_with?(&1, "  >"))
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join(" ")
+  end
+
   defp format_changeset_errors(changeset) do
-    changeset
-    |> Ash.Changeset.errors()
+    changeset.errors
     |> Enum.map(fn error ->
       %{
-        field: error.field,
+        field: to_string(error.field || :base),
         message: error.message
       }
     end)

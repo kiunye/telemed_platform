@@ -9,7 +9,7 @@ import Config
 config :telemed_admin, TelemedAdminWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
+  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4001")],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
@@ -76,3 +76,14 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Configure database for development
+config :telemed_core, TelemedCore.Repo,
+  database: System.get_env("POSTGRES_DB", "telemed_dev"),
+  username: System.get_env("POSTGRES_USER", "telemed"),
+  password: System.get_env("POSTGRES_PASSWORD", "telemed_dev_password"),
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
+  port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10,
+  log: :info

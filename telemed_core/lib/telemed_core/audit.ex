@@ -6,7 +6,8 @@ defmodule TelemedCore.Audit do
   - General audit logs (user actions, system events)
   - EHR access logs (HIPAA compliance requirement)
   """
-  use Ash.Domain
+  use Ash.Domain,
+    extensions: [Ash.Policy.Authorizer]
 
   resources do
     resource TelemedCore.Audit.AuditLog

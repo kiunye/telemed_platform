@@ -3,6 +3,7 @@ defmodule TelemedApiWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug TelemedApiWeb.Plugs.CorrelationId
   end
 
   pipeline :authenticate do

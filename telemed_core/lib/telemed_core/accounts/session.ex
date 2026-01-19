@@ -6,7 +6,8 @@ defmodule TelemedCore.Accounts.Session do
   """
   use Ash.Resource,
     domain: TelemedCore.Accounts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "sessions"
@@ -14,11 +15,10 @@ defmodule TelemedCore.Accounts.Session do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "ses"
+    uuid_v7_primary_key :id
 
     attribute :refresh_token, :string do
       allow_nil? false
-      private? true
     end
 
     attribute :expires_at, :utc_datetime do
@@ -45,8 +45,12 @@ defmodule TelemedCore.Accounts.Session do
 
     create :create_session do
       accept [:user_id, :ip_address, :user_agent]
-      argument :refresh_token, :string, allow_nil? false
-      argument :expires_at, :utc_datetime, allow_nil? false
+      argument :refresh_token, :string do
+        allow_nil? false
+      end
+      argument :expires_at, :utc_datetime do
+        allow_nil? false
+      end
 
       change fn changeset, _context ->
         refresh_token = Ash.Changeset.get_argument(changeset, :refresh_token)
@@ -60,6 +64,7 @@ defmodule TelemedCore.Accounts.Session do
 
     update :revoke do
       accept []
+      require_atomic? false
 
       change fn changeset, _context ->
         Ash.Changeset.force_change_attribute(
@@ -79,7 +84,7 @@ defmodule TelemedCore.Accounts.Session do
 
     # Admins can read all sessions
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
   end
 end

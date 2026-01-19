@@ -6,7 +6,8 @@ defmodule TelemedCore.Accounts.User do
   """
   use Ash.Resource,
     domain: TelemedCore.Accounts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "users"
@@ -14,17 +15,16 @@ defmodule TelemedCore.Accounts.User do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "usr"
+    uuid_v7_primary_key :id
 
     attribute :email, :string do
       allow_nil? false
-      constraints [format: ~r/^[^\s]+@[^\s]+$/]
+      constraints [match: ~r/^[^\s]+@[^\s]+$/]
     end
 
-    attribute :role, :atom do
+    attribute :role, :string do
       allow_nil? false
-      constraints [one_of: [:patient, :doctor, :admin]]
-      default :patient
+      default "patient"
     end
 
     attribute :first_name, :string
@@ -51,6 +51,16 @@ defmodule TelemedCore.Accounts.User do
 
     create :register do
       accept [:email, :first_name, :last_name, :phone, :role]
+
+      validate fn changeset, _context ->
+        role = Ash.Changeset.get_attribute(changeset, :role)
+        if role in ["patient", "doctor", "admin"] do
+          :ok
+        else
+          {:error, field: :role, message: "must be one of: patient, doctor, admin"}
+        end
+      end
+
       change fn changeset, _context ->
         Ash.Changeset.force_change_attribute(changeset, :email_verified, false)
       end
@@ -63,6 +73,7 @@ defmodule TelemedCore.Accounts.User do
 
     update :verify_email do
       accept []
+      require_atomic? false
       change fn changeset, _context ->
         Ash.Changeset.force_change_attribute(changeset, :email_verified, true)
       end
@@ -71,6 +82,11 @@ defmodule TelemedCore.Accounts.User do
   end
 
   policies do
+    # Allow unauthenticated registration - bypass skips all other policy checks
+    bypass action(:register) do
+      authorize_if always()
+    end
+
     # Users can read their own profile
     policy always() do
       authorize_if expr(id == ^actor(:id))
@@ -78,13 +94,13 @@ defmodule TelemedCore.Accounts.User do
 
     # Admins can read all users
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
 
     # Doctors can read patients they have appointments with
     # (This will be expanded when appointments are implemented)
     policy always() do
-      authorize_if expr(actor.role == :doctor and role == :patient)
+      authorize_if expr(actor.role == "doctor" and role == "patient")
     end
   end
 end

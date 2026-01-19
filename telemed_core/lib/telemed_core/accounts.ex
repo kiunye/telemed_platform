@@ -9,7 +9,8 @@ defmodule TelemedCore.Accounts do
   - User profiles (patient, doctor, admin)
   """
 
-  use Ash.Domain
+  use Ash.Domain,
+    extensions: [Ash.Policy.Authorizer]
 
   resources do
     resource TelemedCore.Accounts.User

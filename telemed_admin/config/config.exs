@@ -10,6 +10,23 @@ import Config
 config :telemed_admin,
   generators: [timestamp_type: :utc_datetime]
 
+# Configure Ecto repositories (for telemed_core dependency)
+config :telemed_core, ecto_repos: [TelemedCore.Repo]
+
+# Configure database connection for TelemedCore.Repo
+config :telemed_core, TelemedCore.Repo,
+  database: System.get_env("POSTGRES_DB", "telemed_dev"),
+  username: System.get_env("POSTGRES_USER", "telemed"),
+  password: System.get_env("POSTGRES_PASSWORD", "telemed_dev_password"),
+  hostname: System.get_env("POSTGRES_HOST", "localhost"),
+  port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
+# Ash configuration
+config :telemed_core,
+  ash_domains: [TelemedCore.Accounts, TelemedCore.Audit, TelemedCore.Appointments]
+
 # Configures the endpoint
 config :telemed_admin, TelemedAdminWeb.Endpoint,
   url: [host: "localhost"],

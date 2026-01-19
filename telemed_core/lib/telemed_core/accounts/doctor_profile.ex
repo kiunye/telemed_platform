@@ -4,7 +4,8 @@ defmodule TelemedCore.Accounts.DoctorProfile do
   """
   use Ash.Resource,
     domain: TelemedCore.Accounts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "doctor_profiles"
@@ -12,7 +13,7 @@ defmodule TelemedCore.Accounts.DoctorProfile do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "doc"
+    uuid_v7_primary_key :id
 
     attribute :specialty, :string
     attribute :license_number, :string
@@ -29,7 +30,6 @@ defmodule TelemedCore.Accounts.DoctorProfile do
     belongs_to :user, TelemedCore.Accounts.User do
       attribute_writable? true
       allow_nil? false
-      unique? true
     end
   end
 
@@ -49,6 +49,7 @@ defmodule TelemedCore.Accounts.DoctorProfile do
 
     update :verify do
       accept []
+      require_atomic? false
       change fn changeset, _context ->
         Ash.Changeset.force_change_attribute(changeset, :verified, true)
       end
@@ -68,7 +69,7 @@ defmodule TelemedCore.Accounts.DoctorProfile do
 
     # Admins can read all profiles
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
   end
 end

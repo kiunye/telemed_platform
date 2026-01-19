@@ -4,7 +4,9 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
 
   This is the boundary layer that orchestrates authentication operations.
   """
-  alias TelemedCore.Accounts
+  import Ash.Expr
+  require Ash.Query
+  require Logger
   alias TelemedCore.Accounts.{User, Credential, Session}
   alias TelemedCore.Accounts.Impl.JWT
 
@@ -28,7 +30,7 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
     with {:ok, user} <- find_user_by_email(email),
          {:ok, credential} <- find_credential_by_user_id(user.id),
          :ok <- verify_password(credential, password),
-         {:ok, access_token, access_expires_at} <- JWT.generate_access_token(user),
+         {:ok, access_token, _access_expires_at} <- JWT.generate_access_token(user),
          {:ok, refresh_token, refresh_expires_at} <- JWT.generate_refresh_token(user),
          {:ok, session} <- create_session(user.id, refresh_token, refresh_expires_at, ip_address, user_agent) do
       {:ok, user, access_token, refresh_token, session}
@@ -55,7 +57,9 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
   def revoke_session(session_id) do
     case Ash.get(Session, session_id) do
       {:ok, session} ->
-        Session.revoke(session)
+        session
+        |> Ash.Changeset.for_update(:revoke, %{})
+        |> Ash.update()
 
       {:error, _} = error ->
         error
@@ -76,11 +80,18 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
   # Private helper functions
 
   defp create_user(attrs) do
-    User.register(attrs)
+    # Filter out password - it goes to Credential, not User
+    user_attrs = Map.drop(attrs, [:password])
+
+    User
+    |> Ash.Changeset.for_create(:register, user_attrs)
+    |> Ash.create()
   end
 
   defp create_credential(user_id, password) when is_binary(password) do
-    Credential.create_with_password(%{user_id: user_id}, %{password: password})
+    Credential
+    |> Ash.Changeset.for_create(:create_with_password, %{user_id: user_id}, arguments: %{password: password})
+    |> Ash.create()
   end
 
   defp create_credential(_user_id, _password) do
@@ -90,7 +101,7 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
   defp find_user_by_email(email) do
     case Ash.read_one(
            Ash.Query.for_read(User, :read)
-           |> Ash.Query.filter(email == ^email)
+           |> Ash.Query.filter(expr(email == ^email))
          ) do
       {:ok, nil} -> {:error, :user_not_found}
       {:ok, user} -> {:ok, user}
@@ -108,7 +119,7 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
   defp find_credential_by_user_id(user_id) do
     case Ash.read_one(
            Ash.Query.for_read(Credential, :read)
-           |> Ash.Query.filter(user_id == ^user_id)
+           |> Ash.Query.filter(expr(user_id == ^user_id))
          ) do
       {:ok, nil} -> {:error, :credential_not_found}
       {:ok, credential} -> {:ok, credential}
@@ -125,23 +136,19 @@ defmodule TelemedCore.Accounts.Impl.AuthService do
   end
 
   defp create_session(user_id, refresh_token, expires_at, ip_address, user_agent) do
-    Session.create_session(
-      %{
-        user_id: user_id,
-        ip_address: ip_address,
-        user_agent: user_agent
-      },
-      %{
-        refresh_token: refresh_token,
-        expires_at: DateTime.from_unix!(expires_at)
-      }
+    Session
+    |> Ash.Changeset.for_create(
+      :create_session,
+      %{user_id: user_id, ip_address: ip_address, user_agent: user_agent},
+      arguments: %{refresh_token: refresh_token, expires_at: DateTime.from_unix!(expires_at)}
     )
+    |> Ash.create()
   end
 
   defp find_session_by_token(refresh_token) do
     case Ash.read_one(
            Ash.Query.for_read(Session, :read)
-           |> Ash.Query.filter(refresh_token == ^refresh_token)
+           |> Ash.Query.filter(expr(refresh_token == ^refresh_token))
          ) do
       {:ok, nil} -> {:error, :session_not_found}
       {:ok, session} -> {:ok, session}

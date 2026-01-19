@@ -32,5 +32,3 @@ defmodule TelemedAdminWeb.DashboardLive do
     """
   end
 end
-
-end

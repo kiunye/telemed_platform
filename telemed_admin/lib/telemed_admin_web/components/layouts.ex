@@ -31,6 +31,8 @@ defmodule TelemedAdminWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :current_user, :map, default: nil, doc: "the current authenticated user"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -38,7 +40,7 @@ defmodule TelemedAdminWeb.Layouts do
     <header class="navbar px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
         <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
+          <img src="/images/logo.svg" width="36" />
           <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
         </a>
       </div>
@@ -75,10 +77,6 @@ defmodule TelemedAdminWeb.Layouts do
   @doc """
   Admin layout with navigation and user info.
   """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
-  attr :current_user, :map, default: nil, doc: "the current authenticated user"
-  slot :inner_block, required: true
-
   def admin(assigns) do
     ~H"""
     <div class="min-h-screen bg-neutral-50">
@@ -91,19 +89,19 @@ defmodule TelemedAdminWeb.Layouts do
               </div>
               <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <a
-                  href={~p"/dashboard"}
+                  href="/dashboard"
                   class="border-primary-500 text-neutral-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Dashboard
                 </a>
                 <a
-                  href={~p"/users"}
+                  href="/users"
                   class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Users
                 </a>
                 <a
-                  href={~p"/audit"}
+                  href="/audit"
                   class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Audit Logs
@@ -117,7 +115,7 @@ defmodule TelemedAdminWeb.Layouts do
                 <% end %>
               </span>
               <a
-                href={~p"/login"}
+                href="/login"
                 class="text-sm text-neutral-500 hover:text-neutral-700"
               >
                 Logout

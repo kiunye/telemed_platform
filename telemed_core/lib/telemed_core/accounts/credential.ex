@@ -6,7 +6,8 @@ defmodule TelemedCore.Accounts.Credential do
   """
   use Ash.Resource,
     domain: TelemedCore.Accounts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "credentials"
@@ -14,11 +15,10 @@ defmodule TelemedCore.Accounts.Credential do
   end
 
   attributes do
-    uuid_v7_primary_key :id, prefix: "crd"
+    uuid_v7_primary_key :id
 
     attribute :password_hash, :string do
       allow_nil? false
-      private? true
     end
 
     timestamps()
@@ -36,7 +36,9 @@ defmodule TelemedCore.Accounts.Credential do
 
     create :create_with_password do
       accept [:user_id]
-      argument :password, :string, allow_nil? false
+      argument :password, :string do
+        allow_nil? false
+      end
 
       change fn changeset, context ->
         password = Ash.Changeset.get_argument(changeset, :password)
@@ -58,7 +60,10 @@ defmodule TelemedCore.Accounts.Credential do
 
     update :update_password do
       accept []
-      argument :password, :string, allow_nil? false
+      require_atomic? false
+      argument :password, :string do
+        allow_nil? false
+      end
 
       change fn changeset, context ->
         password = Ash.Changeset.get_argument(changeset, :password)
@@ -78,6 +83,11 @@ defmodule TelemedCore.Accounts.Credential do
   end
 
   policies do
+    # Allow credential creation during registration - bypass skips all other policy checks
+    bypass action(:create_with_password) do
+      authorize_if always()
+    end
+
     # Users can only read their own credentials (for verification)
     policy always() do
       authorize_if expr(user_id == ^actor(:id))
@@ -85,7 +95,7 @@ defmodule TelemedCore.Accounts.Credential do
 
     # Admins can read all credentials (for support)
     policy always() do
-      authorize_if expr(actor.role == :admin)
+      authorize_if expr(actor.role == "admin")
     end
   end
 end
