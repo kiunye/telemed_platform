@@ -22,7 +22,7 @@ defmodule TelemedAdminWeb.Plugs.RequireAuthenticated do
         # Load user and assign to conn
         case Ash.get(User, user_id) do
           {:ok, user} ->
-            if user.role in [:admin, :doctor] do
+            if user.role in ["admin", "doctor"] do
               assign(conn, :current_user, user)
             else
               conn

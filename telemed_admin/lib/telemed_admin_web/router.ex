@@ -22,6 +22,7 @@ defmodule TelemedAdminWeb.Router do
     pipe_through(:browser)
 
     live("/login", Auth.LoginLive, :index)
+    get("/set-session", AuthController, :set_session)
   end
 
   scope "/", TelemedAdminWeb do

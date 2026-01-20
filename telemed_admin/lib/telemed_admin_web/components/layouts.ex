@@ -89,33 +89,45 @@ defmodule TelemedAdminWeb.Layouts do
               </div>
               <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <a
-                  href="/dashboard"
+                  href={~p"/dashboard"}
                   class="border-primary-500 text-neutral-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Dashboard
                 </a>
                 <a
-                  href="/users"
+                  href={~p"/users"}
                   class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Users
                 </a>
                 <a
-                  href="/audit"
+                  href={~p"/audit"}
                   class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Audit Logs
+                </a>
+                <a
+                  href={~p"/availability"}
+                  class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Availability
+                </a>
+                <a
+                  href={~p"/calendar"}
+                  class="border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Calendar
                 </a>
               </div>
             </div>
             <div class="flex items-center">
               <span class="text-sm text-neutral-700 mr-4">
-                <%= if @current_user do %>
+                <%= if assigns[:current_user] do %>
                   <%= @current_user.email %>
                 <% end %>
               </span>
               <a
-                href="/login"
+                href={~p"/auth/logout"}
                 class="text-sm text-neutral-500 hover:text-neutral-700"
               >
                 Logout
@@ -125,7 +137,7 @@ defmodule TelemedAdminWeb.Layouts do
         </div>
       </nav>
 
-      <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main class="w-full">
         {render_slot(@inner_block)}
       </main>
     </div>

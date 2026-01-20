@@ -4,6 +4,8 @@ defmodule TelemedAdminWeb.CalendarLive do
   """
   use TelemedAdminWeb, :live_view
 
+  on_mount TelemedAdminWeb.LiveHooks
+
   alias TelemedCore.Appointments.Appointment
   require Ash.Query
 

@@ -4,6 +4,8 @@ defmodule TelemedAdminWeb.AvailabilityLive do
   """
   use TelemedAdminWeb, :live_view
 
+  on_mount TelemedAdminWeb.LiveHooks
+
   alias TelemedCore.Appointments.AvailabilitySlot
   require Ash.Query
 

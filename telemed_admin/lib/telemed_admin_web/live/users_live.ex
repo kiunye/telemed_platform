@@ -4,6 +4,8 @@ defmodule TelemedAdminWeb.UsersLive do
   """
   use TelemedAdminWeb, :live_view
 
+  on_mount TelemedAdminWeb.LiveHooks
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok, assign(socket, page_title: "Users")}

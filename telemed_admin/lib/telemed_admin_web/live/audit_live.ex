@@ -4,6 +4,8 @@ defmodule TelemedAdminWeb.AuditLive do
   """
   use TelemedAdminWeb, :live_view
 
+  on_mount TelemedAdminWeb.LiveHooks
+
   alias TelemedCore.Audit.AuditLog
 
   @impl true
