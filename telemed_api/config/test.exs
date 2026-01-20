@@ -27,3 +27,7 @@ config :telemed_core, TelemedCore.Repo,
   hostname: System.get_env("POSTGRES_HOST", "localhost"),
   port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
   pool_size: 10
+
+# Configure JWT secret key for tests
+config :telemed_core, :jwt_secret_key,
+  System.get_env("JWT_SECRET_KEY", "test-secret-key-for-testing-only")

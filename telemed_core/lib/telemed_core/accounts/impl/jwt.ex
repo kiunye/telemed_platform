@@ -17,7 +17,7 @@ defmodule TelemedCore.Accounts.Impl.JWT do
     signer = Signer.create("HS256", secret)
 
     now = DateTime.utc_now() |> DateTime.to_unix()
-    expires_at = now + (@access_token_expiry_hours * 3600)
+    expires_at = now + @access_token_expiry_hours * 3600
 
     claims = %{
       "sub" => user.id,
@@ -42,7 +42,7 @@ defmodule TelemedCore.Accounts.Impl.JWT do
     signer = Signer.create("HS256", secret)
 
     now = DateTime.utc_now() |> DateTime.to_unix()
-    expires_at = now + (@refresh_token_expiry_days * 86400)
+    expires_at = now + @refresh_token_expiry_days * 86400
 
     claims = %{
       "sub" => user.id,
@@ -64,7 +64,7 @@ defmodule TelemedCore.Accounts.Impl.JWT do
     secret = get_secret_key()
     signer = Signer.create("HS256", secret)
 
-    case Joken.verify_and_validate(token, signer) do
+    case Joken.verify_and_validate(%{}, token, signer) do
       {:ok, claims} ->
         if claims["type"] == "access" do
           {:ok, claims}
@@ -84,7 +84,7 @@ defmodule TelemedCore.Accounts.Impl.JWT do
     secret = get_secret_key()
     signer = Signer.create("HS256", secret)
 
-    case Joken.verify_and_validate(token, signer) do
+    case Joken.verify_and_validate(%{}, token, signer) do
       {:ok, claims} ->
         if claims["type"] == "refresh" do
           {:ok, claims}
@@ -108,10 +108,11 @@ defmodule TelemedCore.Accounts.Impl.JWT do
   end
 
   defp get_secret_key do
-    System.get_env("JWT_SECRET_KEY") ||
+    Application.get_env(:telemed_core, :jwt_secret_key) ||
+      System.get_env("JWT_SECRET_KEY") ||
       raise """
       JWT_SECRET_KEY environment variable is missing.
-      Set it in your .env file.
+      Set it in your .env file or config/runtime.exs.
       """
   end
 end

@@ -26,6 +26,19 @@ config :telemed_core, TelemedCore.Repo,
   port: String.to_integer(System.get_env("POSTGRES_PORT") || "5432"),
   pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
+# Configure JWT secret key for TelemedCore
+# This applies to all environments (dev, test, prod)
+config :telemed_core, :jwt_secret_key,
+  System.get_env("JWT_SECRET_KEY") ||
+    (if config_env() == :dev do
+       "default-dev-secret-key-change-in-production"
+     else
+       raise """
+       environment variable JWT_SECRET_KEY is missing.
+       You can generate one by calling: mix phx.gen.secret
+       """
+     end)
+
 if System.get_env("PHX_SERVER") do
   config :telemed_admin, TelemedAdminWeb.Endpoint, server: true
 end

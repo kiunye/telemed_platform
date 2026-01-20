@@ -68,3 +68,8 @@ config :telemed_core, TelemedCore.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
   log: :info
+
+# Configure JWT secret key for development
+# Uses environment variable if set, otherwise uses a default dev key
+config :telemed_core, :jwt_secret_key,
+  System.get_env("JWT_SECRET_KEY", "default-dev-secret-key-change-in-production")

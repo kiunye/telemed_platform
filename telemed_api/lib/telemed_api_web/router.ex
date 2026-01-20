@@ -24,6 +24,14 @@ defmodule TelemedApiWeb.Router do
 
       get "/auth/me", AuthController, :me
       post "/auth/logout", AuthController, :logout
+
+      # Appointments
+      get "/appointments/availability", AppointmentsController, :search_availability
+      get "/appointments", AppointmentsController, :index
+      post "/appointments", AppointmentsController, :create
+      get "/appointments/:id", AppointmentsController, :show
+      patch "/appointments/:id/reschedule", AppointmentsController, :reschedule
+      post "/appointments/:id/cancel", AppointmentsController, :cancel
     end
   end
 

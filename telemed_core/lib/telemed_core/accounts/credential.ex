@@ -10,15 +10,15 @@ defmodule TelemedCore.Accounts.Credential do
     authorizers: [Ash.Policy.Authorizer]
 
   postgres do
-    table "credentials"
-    repo TelemedCore.Repo
+    table("credentials")
+    repo(TelemedCore.Repo)
   end
 
   attributes do
-    uuid_v7_primary_key :id
+    uuid_v7_primary_key(:id)
 
     attribute :password_hash, :string do
-      allow_nil? false
+      allow_nil?(false)
     end
 
     timestamps()
@@ -26,21 +26,22 @@ defmodule TelemedCore.Accounts.Credential do
 
   relationships do
     belongs_to :user, TelemedCore.Accounts.User do
-      attribute_writable? true
-      allow_nil? false
+      attribute_writable?(true)
+      allow_nil?(false)
     end
   end
 
   actions do
-    defaults [:read]
+    defaults([:read])
 
     create :create_with_password do
-      accept [:user_id]
+      accept([:user_id])
+
       argument :password, :string do
-        allow_nil? false
+        allow_nil?(false)
       end
 
-      change fn changeset, context ->
+      change(fn changeset, context ->
         password = Ash.Changeset.get_argument(changeset, :password)
 
         # Validate password strength
@@ -55,17 +56,18 @@ defmodule TelemedCore.Accounts.Credential do
           hash = Bcrypt.hash_pwd_salt(password)
           Ash.Changeset.change_attribute(changeset, :password_hash, hash)
         end
-      end
+      end)
     end
 
     update :update_password do
-      accept []
-      require_atomic? false
+      accept([])
+      require_atomic?(false)
+
       argument :password, :string do
-        allow_nil? false
+        allow_nil?(false)
       end
 
-      change fn changeset, context ->
+      change(fn changeset, context ->
         password = Ash.Changeset.get_argument(changeset, :password)
 
         if String.length(password) < 8 do
@@ -78,24 +80,29 @@ defmodule TelemedCore.Accounts.Credential do
           hash = Bcrypt.hash_pwd_salt(password)
           Ash.Changeset.change_attribute(changeset, :password_hash, hash)
         end
-      end
+      end)
     end
   end
 
   policies do
     # Allow credential creation during registration - bypass skips all other policy checks
     bypass action(:create_with_password) do
-      authorize_if always()
+      authorize_if(always())
+    end
+
+    # Allow unauthenticated credential lookup for login
+    bypass action(:read) do
+      authorize_if(always())
     end
 
     # Users can only read their own credentials (for verification)
     policy always() do
-      authorize_if expr(user_id == ^actor(:id))
+      authorize_if(expr(user_id == ^actor(:id)))
     end
 
     # Admins can read all credentials (for support)
     policy always() do
-      authorize_if expr(actor.role == "admin")
+      authorize_if(expr(actor.role == "admin"))
     end
   end
 end

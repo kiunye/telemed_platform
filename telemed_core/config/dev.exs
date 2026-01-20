@@ -9,5 +9,4 @@ config :telemed_core, TelemedCore.Repo,
   port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
-  log: :info,
-  parameters: [client_encoding: "UTF8"]
+  log: :info

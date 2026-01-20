@@ -15,7 +15,8 @@ config :telemed_core, TelemedCore.Repo,
   hostname: System.get_env("POSTGRES_HOST", "localhost"),
   port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  parameters: [client_encoding: "utf8"]
 
 # Ash configuration
 config :telemed_core,

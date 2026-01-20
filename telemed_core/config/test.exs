@@ -8,4 +8,5 @@ config :telemed_core, TelemedCore.Repo,
   hostname: System.get_env("POSTGRES_HOST", "localhost"),
   port: String.to_integer(System.get_env("POSTGRES_PORT", "5432")),
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10
+  pool_size: 10,
+  parameters: [client_encoding: "utf8"]

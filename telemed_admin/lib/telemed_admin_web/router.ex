@@ -2,34 +2,36 @@ defmodule TelemedAdminWeb.Router do
   use TelemedAdminWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, html: {TelemedAdminWeb.Layouts, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, html: {TelemedAdminWeb.Layouts, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   pipeline :require_authenticated do
-    plug TelemedAdminWeb.Plugs.RequireAuthenticated
+    plug(TelemedAdminWeb.Plugs.RequireAuthenticated)
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
   scope "/", TelemedAdminWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    live "/login", Auth.LoginLive, :index
+    live("/login", Auth.LoginLive, :index)
   end
 
   scope "/", TelemedAdminWeb do
-    pipe_through [:browser, :require_authenticated]
+    pipe_through([:browser, :require_authenticated])
 
-    live "/dashboard", DashboardLive, :index
-    live "/users", UsersLive, :index
-    live "/audit", AuditLive, :index
+    live("/dashboard", DashboardLive, :index)
+    live("/users", UsersLive, :index)
+    live("/audit", AuditLive, :index)
+    live("/availability", AvailabilityLive, :index)
+    live("/calendar", CalendarLive, :index)
   end
 
   # Other scopes may use custom stacks.
@@ -47,10 +49,10 @@ defmodule TelemedAdminWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      live_dashboard "/dashboard", metrics: TelemedAdminWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      live_dashboard("/dashboard", metrics: TelemedAdminWeb.Telemetry)
+      forward("/mailbox", Plug.Swoosh.MailboxPreview)
     end
   end
 end

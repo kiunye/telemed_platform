@@ -19,3 +19,8 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     socket_options: maybe_ipv6
 end
+
+# JWT configuration
+config :telemed_core,
+       :jwt_secret_key,
+       System.get_env("JWT_SECRET_KEY", "default-dev-secret-key-change-in-production")

@@ -115,10 +115,23 @@ defmodule TelemedApiWeb.AuthController do
         |> put_status(:unauthorized)
         |> json(%{error: "Invalid email or password"})
 
-      {:error, reason} ->
+      {:error, %Ash.Error.Invalid{} = error} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{
+          error: "Session creation failed",
+          details: format_ash_errors(error)
+        })
+
+      {:error, reason} when is_atom(reason) ->
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{error: to_string(reason)})
+
+      {:error, reason} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{error: "An error occurred", details: inspect(reason)})
     end
   end
 
@@ -162,10 +175,31 @@ defmodule TelemedApiWeb.AuthController do
         |> put_status(:unauthorized)
         |> json(%{error: "Refresh token revoked"})
 
-      {:error, reason} ->
+      {:error, %Ash.Error.Unknown{} = error} ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{
+          error: "Authentication failed",
+          details: format_ash_unknown_error(error)
+        })
+
+      {:error, %Ash.Error.Invalid{} = error} ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{
+          error: "Authentication failed",
+          details: format_ash_errors(error)
+        })
+
+      {:error, reason} when is_atom(reason) ->
         conn
         |> put_status(:unauthorized)
         |> json(%{error: to_string(reason)})
+
+      {:error, reason} ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: "Authentication failed", details: inspect(reason)})
     end
   end
 
@@ -249,6 +283,21 @@ defmodule TelemedApiWeb.AuthController do
         field: to_string(error.field || :base),
         message: error.message
       }
+    end)
+  end
+
+  defp format_ash_unknown_error(%Ash.Error.Unknown{errors: errors}) do
+    errors
+    |> Enum.map(fn error ->
+      message = case error do
+        %{error: error_message} when is_binary(error_message) ->
+          error_message
+        _ ->
+          Exception.message(error)
+      end
+      |> clean_error_message()
+
+      %{message: message}
     end)
   end
 end

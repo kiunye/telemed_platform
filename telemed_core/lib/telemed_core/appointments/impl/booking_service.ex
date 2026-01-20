@@ -21,12 +21,14 @@ defmodule TelemedCore.Appointments.Impl.BookingService do
       check_doctor_available(attrs[:doctor_id], attrs[:scheduled_at], attrs[:duration_minutes])
     end)
     |> Multi.run(:create_appointment, fn _repo, _changes ->
-      Appointment
-      |> Ash.Changeset.for_create(:book, attrs)
-      |> Ash.create()
+      Appointment.book(attrs)
     end)
     |> Multi.run(:log_event, fn _repo, %{create_appointment: appointment} ->
       log_appointment_event(appointment, :created, nil, :scheduled, actor_id)
+    end)
+    |> Multi.run(:schedule_reminders, fn _repo, %{create_appointment: appointment} ->
+      TelemedCore.Appointments.Impl.NotificationService.schedule_reminders(appointment.id)
+      {:ok, :scheduled}
     end)
     |> TelemedCore.Repo.transaction()
   end
